@@ -10,8 +10,8 @@ def get_cluster_test_loader():
     train_transform, val_transform = construct_dataset(args['cluster']['train'], config['cluster']['train'])
     train_all = Market1501(args['cluster']['train'], train_transform, 'train')
     # train_dataset, val_dataset = split_train_val(train_all)
-    gallery_dataset = Market1501(args['cluster']['train'], val_transform, 'test')
-    query_dataset = Market1501(args['cluster']['train'], val_transform, 'query')
+    gallery_dataset = Market1501(args['cluster']['train'], val_transform, 'test', re_label=False)
+    query_dataset = Market1501(args['cluster']['train'], val_transform, 'query', re_label=False)
 
     train_loader = dataloader.DataLoader(train_all, batch_size=cluster_args.batch_size, num_workers=cluster_args.num_workers)
     # eva_loader = dataloader.DataLoader(val_dataset, batch_size=cluster_args.batch_size, num_workers=args.num_workers)

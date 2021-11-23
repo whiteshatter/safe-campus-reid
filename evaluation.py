@@ -88,10 +88,11 @@ def extract_features(feature_extractor, data_iterator, gpu_ids, is_test, flips=F
         feature_extractor.cuda(gpu_ids[0])
 
     with torch.no_grad():
-        for ipt, pids, cam_id in tqdm(data_iterator):
+        for ipt, pids, cam_id, path in tqdm(data_iterator):
             target = {}
             target['pid'] = pids
             target['camid'] = cam_id
+            target['img_path'] = path
             if gpu_ids is not None:
                 if len(gpu_ids) == 1:
                     ipt = ipt.cuda(gpu_ids[0], non_blocking=True)

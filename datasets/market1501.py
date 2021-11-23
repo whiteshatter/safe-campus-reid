@@ -6,8 +6,8 @@ from torch.utils.data import dataset
 from torchvision.datasets.folder import default_loader
 
 class Market1501(dataset.Dataset):
-    def __init__(self, args, transform, dtype):
-
+    def __init__(self, args, transform, dtype, re_label=True):
+        self.re_label = re_label
         self.transform = transform
         self.loader = default_loader
 
@@ -32,13 +32,15 @@ class Market1501(dataset.Dataset):
     def __getitem__(self, index):
         path = self.imgs[index]
         cam_id = self.camera(path)
-        target = self._id2label[self.id(path)]
-
+        if self.re_label:
+            target = self._id2label[self.id(path)]
+        else:
+            target = self.id(path)
         img = self.loader(path)
         if self.transform is not None:
             img = self.transform(img)
 
-        return img, target, cam_id
+        return img, target, cam_id, path
 
     def __len__(self):
         return len(self.imgs)
