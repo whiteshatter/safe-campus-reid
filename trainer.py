@@ -1,12 +1,11 @@
-import os
-import torch
-import numpy as np
-import torch.nn.functional as F
-from scipy.spatial.distance import cdist
+import os.path
+
 from evaluation import test as get_result
 
 
 # from apex import amp
+from model.cluster.construct_engine import construct_engine
+
 
 class Trainer():
     def __init__(self, args, config, model, loader):
@@ -16,6 +15,11 @@ class Trainer():
         self.loader = loader
 
     def train(self):
+        print("=================   the first stage train begin   ====================")
+        self.train_cluster()
+        self.model['cluster'].cpu()
+        print("=================    the first stage train end    ====================")
+
         pass
 
 
@@ -25,22 +29,6 @@ class Trainer():
         print('test cluster finish')
 
     def test_cluster(self, model):
-        args = self.args['cluster']['test']
-        if args.gpu_ids is None:
-            checkpoint = torch.load(args.restore_file)
-        else:
-            loc = 'cuda:{}'.format(args.gpu_ids[0])
-            checkpoint = torch.load(args.restore_file, map_location=loc)
-
-        print('==> Resume checkpoint {}'.format(args.restore_file))
-        if 'state_dict' in checkpoint:
-            checkpoint = checkpoint['state_dict']
-        if 'transfer' in args.version:
-            checkpoint = {key: val for key, val in checkpoint.items() if 'classifier' not in key}
-            msg = model.load_state_dict(checkpoint, strict=False)
-            print(msg)
-        else:
-            model.load_state_dict(checkpoint)
         feature_extractor = model
         store_fs = False
         test_method = 'cosine'
@@ -52,3 +40,48 @@ class Trainer():
 
         for key in result:
             print('{}: {}'.format(key, result[key]))
+
+
+    def train_cluster(self):
+        config = self.config['cluster']['train']
+        model = self.model['cluster']
+        args = self.args['cluster']['train']
+        optimizer = config.optimizer_func(model)
+        train_iterator = self.loader['cluster']['train']
+        val_iterator = self.loader['cluster']['val']
+        query_iterator = self.loader['cluster']['query']
+        gallery_iterator = self.loader['cluster']['gallery']
+        model = model.cuda()
+        if config.lr_scheduler_func:
+            lr_scheduler = config.lr_scheduler_func(
+                optimizer, **config.lr_scheduler_params)
+            lr_scheduler_iter = None
+        else:
+            lr_scheduler = None
+            lr_scheduler_iter = config.lr_scheduler_iter_func(len(), optimizer)
+
+        engine_args = dict(gpu_ids=args.gpu_ids,
+                           network=model,
+                           criterion=config.loss_func,
+                           train_iterator=train_iterator,
+                           validate_iterator=val_iterator,
+                           optimizer=optimizer,
+                           )
+
+        checkpoint_dir = 'static/checkpoint/cluster'
+        args.log_dir = os.path.join('logs', 'cluster')
+        engine = construct_engine(engine_args,
+                                  log_freq=args.log_freq,
+                                  log_dir=args.log_dir,
+                                  checkpoint_dir=checkpoint_dir,
+                                  checkpoint_freq=args.checkpoint_freq,
+                                  lr_scheduler=lr_scheduler,
+                                  lr_scheduler_iter=lr_scheduler_iter,
+                                  metric_dict=config.metric_dict,
+                                  query_iterator=query_iterator,
+                                  gallary_iterator=gallery_iterator,
+                                  id_feature_params=config.id_feature_params,
+                                  id_iterator=None,
+                                  test_params=config.test_params
+                                  )
+        engine.resume(args.maxepoch, args.resume_epoch, args.resume_iteration)

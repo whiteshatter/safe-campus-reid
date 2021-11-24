@@ -61,13 +61,12 @@ def split_train_val(train_all):
     pid_count = defaultdict(lambda: 0)
     train = []
     val = []
-    for img_file, label in train_all:
-        pid = label['pid']
+    for img_file, pid, camera_id, path in train_all:
         pid_count[pid] += 1
         if pid_count[pid] == 1:
-            val.append([img_file, label])
+            val.append([img_file, pid, camera_id, path])
         else:
-            train.append([img_file, label])
+            train.append([img_file, pid, camera_id, path])
     training_pid_count = 0
     for key in pid_count:
         if pid_count[key] != 1:
