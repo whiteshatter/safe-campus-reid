@@ -1,4 +1,5 @@
 static/checkpoint
 .idea
 *.iml
+*.pyc
 logs
