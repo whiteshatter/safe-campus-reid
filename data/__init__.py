@@ -4,6 +4,10 @@ from datasets.market1501 import Market1501
 from torch.utils.data import dataloader
 import torch
 
+from utils.random_erasing import RandomErasing
+from data.sampler import RandomSampler
+from torchvision import transforms
+from importlib import import_module
 
 def get_cluster_test_loader():
     cluster_args = args['cluster']['train']
@@ -22,6 +26,47 @@ def get_cluster_test_loader():
 
     return train_loader, eva_loader, test_loaders[0], test_loaders[1]
 
+def get_lagnet_loader():
+    lagnet_arg = args['lagnet']
+    train_list = [
+        transforms.Resize((lagnet_arg.height, lagnet_arg.width), interpolation=3),
+        transforms.RandomHorizontalFlip(),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ]
+    if lagnet_arg.random_erasing:
+        train_list.append(RandomErasing(probability=lagnet_arg.probability, mean=[0.0, 0.0, 0.0]))
+
+    train_transform = transforms.Compose(train_list)
+
+    test_transform = transforms.Compose([
+        transforms.Resize((lagnet_arg.height, lagnet_arg.width), interpolation=3),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
+
+    if not lagnet_arg.test_only:
+        module_train = import_module('datasets.' + lagnet_arg.data_train.lower())
+        trainset = getattr(module_train, lagnet_arg.data_train)(lagnet_arg, train_transform, 'train')
+        train_loader = dataloader.DataLoader(trainset,
+                        sampler=RandomSampler(trainset,lagnet_arg.batchid,batch_image=lagnet_arg.batchimage),
+                        #shuffle=True,
+                        batch_size=lagnet_arg.batchid * lagnet_arg.batchimage,
+                        num_workers=lagnet_arg.nThread)
+    else:
+        train_loader = None
+    
+    if lagnet_arg.data_test in ['Market1501']:
+        module = import_module('datasets.' + lagnet_arg.data_train.lower())
+        testset = getattr(module, lagnet_arg.data_test)(lagnet_arg, test_transform, 'test')
+        queryset = getattr(module, lagnet_arg.data_test)(lagnet_arg, test_transform, 'query')
+    else:
+        raise Exception()
+
+    test_loader = dataloader.DataLoader(testset, batch_size=lagnet_arg.batchtest, num_workers=lagnet_arg.nThread)
+    query_loader = dataloader.DataLoader(queryset, batch_size=lagnet_arg.batchtest, num_workers=lagnet_arg.nThread)
+    return train_loader, test_loader, query_loader, testset, queryset
+
 
 def get_loader():
     # 总体loader
@@ -35,6 +80,13 @@ def get_loader():
     loader['cluster']['query'] = query_loader
     loader['cluster']['gallery'] = gallery_loader
 
+    train_loader, gallery_loader, query_loader, galleryset, queryset = get_lagnet_loader()
+    loader['lagnet'] = {}
+    loader['lagnet']['train'] = train_loader
+    loader['lagnet']['query'] = query_loader
+    loader['lagnet']['gallery'] = gallery_loader
+    loader['lagnet']['queryset'] = queryset
+    loader['lagnet']['galleryset'] = galleryset
     return loader
 
 

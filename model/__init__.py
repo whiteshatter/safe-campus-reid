@@ -1,7 +1,7 @@
 from .cluster import construct_model
+from .lagnet import Model as LAG
 from config import args, config
 import torch
-
 
 def get_cluster_model():
     cluster_args = args['cluster']['test']
@@ -24,11 +24,16 @@ def get_cluster_model():
     #         model.load_state_dict(checkpoint)
     return model
 
+def get_lagnet_model():
+    model = LAG(args['lagnet'])
+    return model
 
 def get_model():
     model = {}
 
     model['cluster'] = get_cluster_model()
+    model['lagnet'] = get_lagnet_model()
+    
     return model
 
 

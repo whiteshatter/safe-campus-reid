@@ -79,6 +79,9 @@ def fliplr(img):
     img_flip = img.index_select(3, inv_idx)
     return img_flip
 
+def fliphor(inputs):
+    inv_idx = torch.arange(inputs.size(3)-1,-1,-1).long()  # N x C x H x W
+    return inputs.index_select(3,inv_idx)
 
 def extract_features(feature_extractor, data_iterator, gpu_ids, is_test, flips=False):
     feature_extractor.eval()
@@ -138,6 +141,25 @@ def extract_features(feature_extractor, data_iterator, gpu_ids, is_test, flips=F
 
     return fets, targets
 
+# lagnet
+def extract_feature(model, loader, device):
+    features = torch.FloatTensor()
+    for inputs, _, _, _ in loader:
+        ff = torch.FloatTensor(inputs.size(0), 3584).zero_() 
+        for i in range(2):
+            if i==1:
+                inputs = fliphor(inputs)
+                
+            input_img = inputs.to(device)
+            outputs = model(input_img)
+            f = outputs[0].data.cpu()
+            ff = ff + f
+
+        fnorm = torch.norm(ff, p=2, dim=1, keepdim=True)
+        ff = ff.div(fnorm.expand_as(ff))
+        features = torch.cat((features, ff), 0)
+
+    return features
 
 def compute_test_metrics(qfets, gfets, qtargets, gtargets, metric='euclidean', reranking=False):
     distmat = compute_distance_matrix(qfets, gfets, metric=metric)
