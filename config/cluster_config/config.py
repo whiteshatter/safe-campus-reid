@@ -85,7 +85,7 @@ def get_dataset_config(args):
 def get_model_config(args):
     if args.dataset_name == 'market1501':
         # TODO: add num_classes
-        num_classes = 702
+        num_classes = 1175
     elif args.dataset_name == 'dukemtm':
         num_classes = 702
     elif args.dataset_name == 'safe':

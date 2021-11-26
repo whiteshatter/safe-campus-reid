@@ -1,11 +1,11 @@
 from .cluster import construct_model
 from .lagnet import Model as LAG
 from config import args, config
-import torch
+from .vit.make_model import make_model
 
 def get_cluster_model():
-    cluster_args = args['cluster']['test']
-    model = construct_model(cluster_args, config['cluster']['test'])
+    model1 = construct_model(args['cluster']['train'], config['cluster']['train'])
+    model2 = construct_model(args['cluster']['train2'], config['cluster']['train2'])
     # save_path = cluster_args.restore_file
     # if save_path is not None or save_path != "":
     #     if cluster_args.gpu_ids is None:
@@ -22,17 +22,22 @@ def get_cluster_model():
     #         print(msg)
     #     else:
     #         model.load_state_dict(checkpoint)
-    return model
+    return model1, model2
 
 def get_lagnet_model():
     model = LAG(args['lagnet'])
     return model
 
-def get_model():
+def get_vit_model(loader):
+    model = make_model(config['vit'],loader['vit']['num_classes'],loader['vit']['cam_num'],loader['vit']['view_num'])
+    return model
+
+def get_model(loader):
     model = {}
 
-    model['cluster'] = get_cluster_model()
+    model['cluster1'], model['cluster2'] = get_cluster_model()
     model['lagnet'] = get_lagnet_model()
+    model['vit'] = get_vit_model(loader)
     
     return model
 

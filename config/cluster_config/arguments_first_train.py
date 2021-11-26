@@ -1,9 +1,9 @@
 from .arguments_base import ArgumentsBase
 
 
-class ArgumentsTrainVal(ArgumentsBase):
+class ArgumentsTrainVal1(ArgumentsBase):
     def __init__(self):
-        super(ArgumentsTrainVal, self).__init__()
+        super(ArgumentsTrainVal1, self).__init__()
 
         parser = self.parser
         parser.add_argument('-fg', '--flag', type=str, default='train')
@@ -14,10 +14,10 @@ class ArgumentsTrainVal(ArgumentsBase):
 
         # dataset loading info
         parser.add_argument('-vb', '--validation-batch-size',
-                            type=int, default=256, help='validation batch size')
+                            type=int, default=16, help='validation batch size')
 
         # model save info
-        parser.add_argument('-cptf', '--checkpoint-freq', default=1, type=int,
+        parser.add_argument('-cptf', '--checkpoint-freq', default=10, type=int,
                             help='the frequency of saving model over epoches')
 
         # training control parameters
@@ -34,5 +34,5 @@ class ArgumentsTrainVal(ArgumentsBase):
                             help='resume model file', metavar='FILE')
 
         # log files info
-        parser.add_argument('-lcd', '--check-log-dir', metavar='DIR', default='strong-baseline-market-bnneck-stage1',
+        parser.add_argument('-lcd', '--check-log-dir', metavar='DIR', default='strong-baseline-duke-bnneck-ibn-a-stage1',
                             help='checkpoints and logs directory')
