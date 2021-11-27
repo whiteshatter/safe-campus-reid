@@ -6,7 +6,7 @@ from config import args, config
 
 if __name__ == '__main__':
 	loader = data.get_loader()
-	model = get_model()
+	model = get_model(loader)
 
 	trainer = Trainer(args, config, model, loader)
 	trainer.train()

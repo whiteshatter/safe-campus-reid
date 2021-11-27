@@ -9,6 +9,8 @@ from data.sampler import RandomSampler
 from torchvision import transforms
 from importlib import import_module
 
+from datasets.vit.make_dataloader import make_dataloader as get_vit_loader
+
 def get_cluster_test_loader():
     cluster_args = args['cluster']['train']
     train_transform, val_transform = construct_dataset(args['cluster']['train'], config['cluster']['train'])
@@ -87,6 +89,17 @@ def get_loader():
     loader['lagnet']['gallery'] = gallery_loader
     loader['lagnet']['queryset'] = queryset
     loader['lagnet']['galleryset'] = galleryset
+
+    train_loader, train_loader_normal, val_loader, num_query, num_classes, cam_num, view_num = get_vit_loader(config['vit'])
+    loader['vit'] = {}
+    loader['vit']['train'] = train_loader
+    loader['vit']['train_loader_normal'] = train_loader_normal
+    loader['vit']['val_loader'] = val_loader
+    loader['vit']['num_query'] = num_query
+    loader['vit']['num_classes'] = num_classes
+    loader['vit']['cam_num'] = cam_num
+    loader['vit']['view_num'] = view_num
+
     return loader
 
 

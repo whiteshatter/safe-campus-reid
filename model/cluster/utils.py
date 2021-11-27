@@ -6,7 +6,18 @@ from . import model_strong_baseline
 from . import model_mgn
 
 def construct_model(args, config):
-    model = external_model_factory[args.model_name](**config.external_model_paras)
+    if 'external' in args.model_name:
+        model = external_model_factory[args.model_name](**config.external_model_paras)
+        return model
+
+    feacture_extractor = feature_extractor_factory[args.model_name](
+        **config.feature_extractor_paras)
+    classifier = classifier_factory[args.model_name](**config.classifier_paras)
+    if 'neck-fs' in args.version:
+        model = PersonReidModelNeck(feacture_extractor, classifier)
+    else:
+        model = PersonReidModel(feacture_extractor, classifier)
+
     return model
 
 
