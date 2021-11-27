@@ -7,6 +7,10 @@ from collections import defaultdict
 import torchvision.transforms as tv_transforms
 import torch.utils.data
 
+from datasets.cluster.market1501 import Market1501
+from datasets.cluster.sampler import RandomIdentitySampler
+
+
 def construct_dataset(args, config):
     normalize = tv_transforms.Normalize(mean=config.dataset_parameters['mean'],
                                         std=config.dataset_parameters['std'])
@@ -21,7 +25,8 @@ def construct_dataset(args, config):
     else:
         train_transform_list = [
             tv_transforms.Resize(
-                config.dataset_parameters['resize_size'], interpolation=config.dataset_parameters['resize_interpolation']),
+                config.dataset_parameters['resize_size'],
+                interpolation=config.dataset_parameters['resize_interpolation']),
             tv_transforms.RandomHorizontalFlip(),
         ]
         if 'pad_size' in config.dataset_parameters:
@@ -34,10 +39,12 @@ def construct_dataset(args, config):
 
     if 'random_erasing_prob' in config.dataset_parameters:
         train_transform_list.append(RandomErasing(
-            probability=config.dataset_parameters['random_erasing_prob'], mean=config.dataset_parameters['random_erasing_mean']))
+            probability=config.dataset_parameters['random_erasing_prob'],
+            mean=config.dataset_parameters['random_erasing_mean']))
 
     train_transform = tv_transforms.Compose(train_transform_list)
-    val_size = config.dataset_parameters['crop_size'] if 'crop_size' in config.dataset_parameters else config.dataset_parameters['resize_size']
+    val_size = config.dataset_parameters['crop_size'] if 'crop_size' in config.dataset_parameters else \
+    config.dataset_parameters['resize_size']
     """
     val_transform = tv_transforms.Compose([
         tv_transforms.Resize(
@@ -53,7 +60,59 @@ def construct_dataset(args, config):
         normalize,
     ])
 
-    return train_transform, val_transform
+    dataset = Market1501(args.data_directory)
+    if args.flag == 'train':
+        if 'train-all' in args.version:
+            train_dataset = ImageDataset(dataset.train, train_transform)
+            val_dataset = None
+        else:
+            # split train/val
+            train, val = split_train_val(dataset.train)
+            train_dataset = ImageDataset(train, train_transform)
+            val_dataset = ImageDataset(val, val_transform)
+
+        # training sampler setup
+        if config.dataset_parameters['sampler'] == 'triplet':
+            sampler = RandomIdentitySampler(train_dataset, **config.dataset_parameters['sampler_paras'])
+            shuffle = False
+        elif config.dataset_parameters['sampler'] == 'random':
+            sampler = None
+            shuffle = True
+        else:
+            raise NotImplementedError
+
+        train_loader = torch.utils.data.DataLoader(
+            train_dataset, batch_size=args.batch_size, shuffle=shuffle, num_workers=args.num_workers, pin_memory=True,
+            sampler=sampler, drop_last=True)
+
+        if val_dataset is not None:
+            val_loader = torch.utils.data.DataLoader(
+                val_dataset, batch_size=args.validation_batch_size, shuffle=False, num_workers=args.num_workers,
+                pin_memory=True)
+        else:
+            val_loader = None
+
+    query_dataset = ImageDataset(dataset.query, val_transform)
+    gallery_dataset = ImageDataset(dataset.gallery, val_transform)
+
+    test_loaders = []
+    test_batch_size = args.validation_batch_size if args.flag == 'train' else args.batch_size
+    for test_dataset in [query_dataset, gallery_dataset]:
+        test_loaders.append(torch.utils.data.DataLoader(
+            test_dataset, batch_size=test_batch_size, shuffle=False, num_workers=args.num_workers, pin_memory=True))
+
+    if 'id' in args.version:
+        id_dataset = ImageDataset(dataset.train, val_transform)
+        id_loader = torch.utils.data.DataLoader(
+            id_dataset, batch_size=args.validation_batch_size, shuffle=False, num_workers=args.num_workers,
+            pin_memory=True)
+
+    if args.flag == 'train':
+        if 'id' in args.version:
+            return train_loader, val_loader, test_loaders[0], test_loaders[1], id_loader
+        return train_loader, val_loader, test_loaders[0], test_loaders[1]
+    else:
+        return test_loaders
 
 
 def split_train_val(train_all):

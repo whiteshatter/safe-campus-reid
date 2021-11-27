@@ -13,20 +13,10 @@ from datasets.vit.make_dataloader import make_dataloader as get_vit_loader
 
 def get_cluster_test_loader():
     cluster_args = args['cluster']['train']
-    train_transform, val_transform = construct_dataset(args['cluster']['train'], config['cluster']['train'])
-    train_all = Market1501(args['cluster']['train'], train_transform, 'train')
-    train_dataset, val_dataset = split_train_val(train_all)
-    gallery_dataset = Market1501(args['cluster']['train'], val_transform, 'test', re_label=False)
-    query_dataset = Market1501(args['cluster']['train'], val_transform, 'query', re_label=False)
+    cluster_config = config['cluster']['train']
+    train_loader, eva_loader, query_loader, gallery_loader = construct_dataset(cluster_args, cluster_config)
 
-    train_loader = dataloader.DataLoader(train_dataset, batch_size=cluster_args.batch_size, num_workers=cluster_args.num_workers)
-    eva_loader = dataloader.DataLoader(val_dataset, batch_size=cluster_args.batch_size, num_workers=cluster_args.num_workers)
-    test_loaders = []
-    for test_dataset in [query_dataset, gallery_dataset]:
-        test_loaders.append(torch.utils.data.DataLoader(
-            test_dataset, batch_size=cluster_args.batch_size, shuffle=False, num_workers=cluster_args.num_workers, pin_memory=True))
-
-    return train_loader, eva_loader, test_loaders[0], test_loaders[1]
+    return train_loader, eva_loader, query_loader, gallery_loader
 
 def get_lagnet_loader():
     lagnet_arg = args['lagnet']

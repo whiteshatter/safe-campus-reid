@@ -93,12 +93,6 @@ def construct_engine(engine_args, log_freq, log_dir, checkpoint_dir, checkpoint_
                     state['network'], id_iterator, state['gpu_ids'], method=id_feature_params['method'])
 
     def on_end_sample(state):
-        pid = state['sample'][1]
-        cid = state['sample'][2]
-        # path = state['sample'][3]
-        state['sample'][1] = {}
-        state['sample'][1]['pid'] = pid
-        state['sample'][1]['camid'] = cid
         wrap_data(state)
         global id_features
         if state['train'] and id_features is not None:  # add id feature as label

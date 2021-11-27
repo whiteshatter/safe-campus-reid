@@ -6,7 +6,7 @@ class ArgumentsBase(object):
         self.parser = argparse.ArgumentParser()
 
         parser = self.parser
-        parser.add_argument('-ddir', '--datadir', default="E:\\dataset\\safe-campus",
+        parser.add_argument('-ddir', '--data-directory', default="E:\\dataset\\safe-campus",
                             help='data directory of the image dataset', metavar='DIR')
 
         # gpu ids
