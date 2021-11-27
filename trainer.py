@@ -149,33 +149,32 @@ class Trainer():
         loss.start_log()
         model.train()
         feature_center = torch.zeros(args.num_classes, args.num_attentions * args.num_features).to(self.device)
+        while epoch <= args.epochs:
+            for batch, (inputs, labels, _,_) in enumerate(train_loader):
+                inputs = inputs.to(self.device)
+                labels = labels.to(self.device)
 
-        for batch, (inputs, labels) in enumerate(train_loader):
-            inputs = inputs.to(self.device)
-            labels = labels.to(self.device)
-
-            optimizer.zero_grad()
-            outputs = model(inputs)
-            
-            feature_center_batch = F.normalize(feature_center[labels], dim=-1)
-            feature_center[labels] += args.L2_beta * (outputs[1].detach() - feature_center_batch)  
-            loss = loss(feature_center_batch, outputs, labels)
-            loss.backward()
+                optimizer.zero_grad()
+                outputs = model(inputs)
                 
-            optimizer.step()
+                feature_center_batch = F.normalize(feature_center[labels], dim=-1)
+                feature_center[labels] += args.L2_beta * (outputs[1].detach() - feature_center_batch)  
+                loss_ = loss(feature_center_batch, outputs, labels)
+                loss_.backward()
+                    
+                optimizer.step()
+            epoch += 1
             
             print('\r[INFO] [{}/{}]\t{}/{}\t{}'.format(
-                epoch, self.args.epochs,
-                batch + 1, len(self.train_loader),
-                self.loss.display_loss(batch)))
+                epoch, args.epochs,
+                batch + 1, len(train_loader),
+                loss.display_loss(batch)))
             # self.ckpt.write_log('\r[INFO] [{}/{}]\t{}/{}\t{}'.format(
             #     epoch, self.args.epochs,
             #     batch + 1, len(self.train_loader),
             #     self.loss.display_loss(batch)), 
             # end='' if batch+1 != len(self.train_loader) else '\n')
-            
-
-        loss.end_log(len(self.train_loader))
+            loss.end_log(len(train_loader))
         target = model.get_model()
         save_dir = os.path.join('logs', 'lagnet', 'model')
         if not os.path.exists(save_dir):
