@@ -60,8 +60,8 @@ parser.add_argument("--resume", type=int, default=0, help='resume from specific 
 parser.add_argument('--save', type=str, default='lagnet', help='file name to save')
 parser.add_argument('--load', type=str, default='', help='file name to load')
 parser.add_argument('--save_models', action='store_true', help='save all intermediate models')
-parser.add_argument('--pre_train', type=str, default='static/checkpoint/lagnet_model_best_3.3.pt', help='pre-trained model directory')
-
+parser.add_argument('--pre_train', type=str, default='', help='pre-trained model directory')
+#static/checkpoint/lagnet_model_best_3.3.pt
 args = parser.parse_args()
 
 for arg in vars(args):

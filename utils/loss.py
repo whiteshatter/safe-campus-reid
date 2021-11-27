@@ -15,7 +15,7 @@ import sys
 import torch
 import torch.nn as nn
 import math
-from .triplet import TripletLoss, TripletSemihardLoss
+from .triplet import TripletLoss as LAGNetTripletLoss
 from .center_loss import CenterLoss
 
 
@@ -236,7 +236,7 @@ class LAGNetLoss(nn.modules.loss._Loss):
             if loss_type == 'CrossEntropy':
                 loss_function = nn.CrossEntropyLoss()
             elif loss_type == 'Triplet':
-                loss_function = TripletLoss(args.margin)
+                loss_function = LAGNetTripletLoss(args.margin)
             elif loss_type == 'L2':
                 loss_function = CenterLoss()
 
@@ -252,7 +252,7 @@ class LAGNetLoss(nn.modules.loss._Loss):
 
         for l in self.loss:
             if l['function'] is not None:
-                print('{:.3f} * {}'.format(l['weight'], l['type']))
+                print('{:.3f} * {} {}'.format(l['weight'], l['type'], l))
                 self.loss_module.append(l['function'])
 
         self.log = torch.Tensor()
