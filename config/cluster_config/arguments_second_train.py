@@ -1,4 +1,4 @@
-from .arguments_base import ArgumentsBase
+from .arguments_second_base import ArgumentsBase
 
 
 class ArgumentsTrainVal2(ArgumentsBase):
@@ -17,7 +17,7 @@ class ArgumentsTrainVal2(ArgumentsBase):
                             type=int, default=16, help='validation batch size')
 
         # model save info
-        parser.add_argument('-cptf', '--checkpoint-freq', default=10, type=int,
+        parser.add_argument('-cptf', '--checkpoint-freq', default=40, type=int,
                             help='the frequency of saving model over epoches')
 
         # training control parameters
@@ -30,7 +30,7 @@ class ArgumentsTrainVal2(ArgumentsBase):
                             default=27118, help='the iteration model resume from')
 
         # model info
-        parser.add_argument('-rf', '--restore-file', default='checkpoints/strong-baseline-duke-bnneck-ibn-a-stage1/e119t27118.pth.tar',
+        parser.add_argument('-rf', '--restore-file', default='E:/gi/safe-campus-reid/static/checkpoint/cluster/e119t231758.pth.tar',
                             help='resume model file', metavar='FILE')
 
         # log files info

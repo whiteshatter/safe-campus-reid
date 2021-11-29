@@ -1,4 +1,4 @@
-from .arguments_base import ArgumentsBase
+from .arguments_first_base import ArgumentsBase
 
 
 class ArgumentsTest(ArgumentsBase):

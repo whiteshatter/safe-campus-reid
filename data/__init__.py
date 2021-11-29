@@ -12,11 +12,11 @@ from importlib import import_module
 from datasets.vit.make_dataloader import make_dataloader as get_vit_loader
 
 def get_cluster_test_loader():
-    cluster_args = args['cluster']['train']
-    cluster_config = config['cluster']['train']
-    train_loader, eva_loader, query_loader, gallery_loader = construct_dataset(cluster_args, cluster_config)
+    cluster_args = args['cluster']['train2']
+    cluster_config = config['cluster']['train2']
+    train_loader, eva_loader, query_loader, gallery_loader, id_loader = construct_dataset(cluster_args, cluster_config)
 
-    return train_loader, eva_loader, query_loader, gallery_loader
+    return train_loader, eva_loader, query_loader, gallery_loader, id_loader
 
 def get_lagnet_loader():
     lagnet_arg = args['lagnet']
@@ -65,30 +65,32 @@ def get_loader():
     loader = {}
 
     # cluster相关loader
-    train_loader, eva_loader, query_loader, gallery_loader = get_cluster_test_loader()
+    train_loader, eva_loader, query_loader, gallery_loader, id_loader = get_cluster_test_loader()
     loader['cluster'] = {}
     loader['cluster']['train'] = train_loader
     loader['cluster']['val'] = eva_loader
     loader['cluster']['query'] = query_loader
     loader['cluster']['gallery'] = gallery_loader
-
-    train_loader, gallery_loader, query_loader, galleryset, queryset = get_lagnet_loader()
-    loader['lagnet'] = {}
-    loader['lagnet']['train'] = train_loader
-    loader['lagnet']['query'] = query_loader
-    loader['lagnet']['gallery'] = gallery_loader
-    loader['lagnet']['queryset'] = queryset
-    loader['lagnet']['galleryset'] = galleryset
-
-    train_loader, train_loader_normal, val_loader, num_query, num_classes, cam_num, view_num = get_vit_loader(config['vit'])
-    loader['vit'] = {}
-    loader['vit']['train'] = train_loader
-    loader['vit']['train_loader_normal'] = train_loader_normal
-    loader['vit']['val_loader'] = val_loader
-    loader['vit']['num_query'] = num_query
-    loader['vit']['num_classes'] = num_classes
-    loader['vit']['cam_num'] = cam_num
-    loader['vit']['view_num'] = view_num
+    loader['cluster']['first']['id'] = None
+    loader['cluster']['second']['id'] = id_loader
+    #
+    # train_loader, gallery_loader, query_loader, galleryset, queryset = get_lagnet_loader()
+    # loader['lagnet'] = {}
+    # loader['lagnet']['train'] = train_loader
+    # loader['lagnet']['query'] = query_loader
+    # loader['lagnet']['gallery'] = gallery_loader
+    # loader['lagnet']['queryset'] = queryset
+    # loader['lagnet']['galleryset'] = galleryset
+    #
+    # train_loader, train_loader_normal, val_loader, num_query, num_classes, cam_num, view_num = get_vit_loader(config['vit'])
+    # loader['vit'] = {}
+    # loader['vit']['train'] = train_loader
+    # loader['vit']['train_loader_normal'] = train_loader_normal
+    # loader['vit']['val_loader'] = val_loader
+    # loader['vit']['num_query'] = num_query
+    # loader['vit']['num_classes'] = num_classes
+    # loader['vit']['cam_num'] = cam_num
+    # loader['vit']['view_num'] = view_num
 
     return loader
 

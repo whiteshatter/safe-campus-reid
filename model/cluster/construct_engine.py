@@ -67,6 +67,8 @@ def construct_engine(engine_args, log_freq, log_dir, checkpoint_dir, checkpoint_
                     'Training/Validating on gpu: {}'.format(state['gpu_ids']))
 
             if state['iteration'] == 0:
+                if not os.path.exists(checkpoint_dir):
+                    os.makedirs(checkpoint_dir)
                 filename = os.path.join(checkpoint_dir, 'init_model.pth.tar')
                 save_model(state, filename)
         else:
@@ -132,16 +134,18 @@ def construct_engine(engine_args, log_freq, log_dir, checkpoint_dir, checkpoint_
                 state['epoch'], state['iteration'])
             file_name = os.path.join(checkpoint_dir, file_name)
             save_model(state, file_name)
-        # start testing
-        t = time.strftime('%c')
-        print(
-            '*************************Start testing at {}**********************'.format(t))
-        result = test(state['network'], query_iterator,
-                      gallary_iterator, state['gpu_ids'],**test_params)
+        if (state['epoch']) % 10 == 0:
+            # start testing
+            t = time.strftime('%c')
+            print(
+                '*************************Start testing at {}**********************'.format(t))
+            result = test(state['network'], query_iterator,
+                          gallary_iterator, state['gpu_ids'],**test_params)
 
-        for key in result:
-            writer.add_scalar('test/{}'.format(key),
-                              result[key], state['epoch'])
+            for key in result:
+                writer.add_scalar('test/{}'.format(key),
+                                  result[key], state['epoch'])
+                print('{}: {}'.format(key, result[key]))
 
         # Note: adjust learning after calling optimizer.step() as required by update after pytorch 1.1.0
         if lr_scheduler is not None:

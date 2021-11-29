@@ -88,16 +88,18 @@ class Trainer():
         val_iterator = self.loader['cluster']['val']
         query_iterator = self.loader['cluster']['query']
         gallery_iterator = self.loader['cluster']['gallery']
+        id_iterator = self.loader['cluster']['first']['id']
         config = self.config['cluster']['train']
         args = self.args['cluster']['train']
         model = self.model['cluster1']
-        self.train_cluster_one_stage(model, config, args, train_iterator, val_iterator, query_iterator, gallery_iterator)
+        # self.train_cluster_one_stage(model, config, args, train_iterator, val_iterator, query_iterator, gallery_iterator, id_iterator)
+        id_iterator = self.loader['cluster']['second']['id']
         config = self.config['cluster']['train2']
         args = self.args['cluster']['train2']
         model = self.model['cluster2']
-        self.train_cluster_one_stage(model, config, args, train_iterator, val_iterator, query_iterator, gallery_iterator)
+        self.train_cluster_one_stage(model, config, args, train_iterator, val_iterator, query_iterator, gallery_iterator, id_iterator)
 
-    def train_cluster_one_stage(self, model, config, args, train_iterator, val_iterator, query_iterator, gallery_iterator):
+    def train_cluster_one_stage(self, model, config, args, train_iterator, val_iterator, query_iterator, gallery_iterator, id_iterator):
         optimizer = config.optimizer_func(model)
         model = model.cuda()
         if config.lr_scheduler_func:
@@ -118,6 +120,41 @@ class Trainer():
 
         checkpoint_dir = 'static/checkpoint/cluster'
         args.log_dir = os.path.join('logs', 'cluster')
+        if args.restore_file is None:
+            # move initialization into the model constuctor __init__
+            # config.initialization_func(model)
+            pass
+        else:
+            if args.gpu_ids is None:
+                checkpoint = torch.load(args.restore_file)
+            else:
+                # Map model to be loaded to specified single gpu.
+                loc = 'cuda:{}'.format(args.gpu_ids[0])
+                checkpoint = torch.load(args.restore_file, map_location=loc)
+
+            if 'new-optim' in args.version:
+                print('==> Reload weights from {}'.format(args.restore_file))
+                ckpt = checkpoint
+                if 'state_dict' in checkpoint:
+                    ckpt = checkpoint['state_dict']
+                model.load_state_dict(ckpt)
+            else:
+                if args.resume_iteration == 0:
+                    print('==> Transfer model weights from {}'.format(args.restore_file))
+                    if 'external-bnneck' in args.model_name:
+                        feature_extractor = model.base
+                    else:
+                        feature_extractor = model.feature_extractor
+                    msg = feature_extractor.load_state_dict(
+                        checkpoint, strict=False)
+                    print(msg)
+                else:
+                    print('==> Resume checkpoint {}'.format(args.restore_file))
+                    model.load_state_dict(checkpoint['state_dict'])
+                    optimizer.load_state_dict(checkpoint['optimizer'])
+                    for group in optimizer.param_groups:
+                        group['initial_lr'] = args.learning_rate
+                        group['lr'] = args.learning_rate
         engine = construct_engine(engine_args,
                                   log_freq=args.log_freq,
                                   log_dir=args.log_dir,
@@ -129,7 +166,7 @@ class Trainer():
                                   query_iterator=query_iterator,
                                   gallary_iterator=gallery_iterator,
                                   id_feature_params=config.id_feature_params,
-                                  id_iterator=None,
+                                  id_iterator=id_iterator,
                                   test_params=config.test_params
                                   )
         engine.resume(args.maxepoch, args.resume_epoch, args.resume_iteration)

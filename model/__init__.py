@@ -36,8 +36,8 @@ def get_model(loader):
     model = {}
 
     model['cluster1'], model['cluster2'] = get_cluster_model()
-    model['lagnet'] = get_lagnet_model()
-    model['vit'] = get_vit_model(loader)
+    # model['lagnet'] = get_lagnet_model()
+    # model['vit'] = get_vit_model(loader)
     
     return model
 

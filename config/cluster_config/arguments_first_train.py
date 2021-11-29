@@ -1,4 +1,4 @@
-from .arguments_base import ArgumentsBase
+from .arguments_first_base import ArgumentsBase
 
 
 class ArgumentsTrainVal1(ArgumentsBase):
@@ -17,7 +17,7 @@ class ArgumentsTrainVal1(ArgumentsBase):
                             type=int, default=16, help='validation batch size')
 
         # model save info
-        parser.add_argument('-cptf', '--checkpoint-freq', default=10, type=int,
+        parser.add_argument('-cptf', '--checkpoint-freq', default=40, type=int,
                             help='the frequency of saving model over epoches')
 
         # training control parameters
