@@ -72,7 +72,7 @@ class Engine(object):
                     loss = loss['total_loss']
                 loss.backward()
                 print('\r[INFO] epoch: {}\t{}/{}\t[loss: {}]'.format(
-                    state['epoch'], maxepoch, index + 1,
+                    state['epoch'], index, len(state['train_iterator']),
                     loss.cpu().data.numpy()))
                 state['optimizer'].step()
                 self.hook('on_end_update', state)

@@ -30,7 +30,7 @@ class ArgumentsTrainVal2(ArgumentsBase):
                             default=27118, help='the iteration model resume from')
 
         # model info
-        parser.add_argument('-rf', '--restore-file', default='static/checkpoint/cluster/init_model.pth.tar',
+        parser.add_argument('-rf', '--restore-file', default='static/checkpoint/cluster/strong-baseline-duke-bnneck-ibn-a-stage1/e119t27118.pth.tar',
                             help='resume model file', metavar='FILE')
 
         # log files info

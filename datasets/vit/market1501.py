@@ -17,11 +17,10 @@ class Market1501(BaseImageDataset):
     # identities: 1501 (+1 for background)
     # images: 12936 (train) + 3368 (query) + 15913 (gallery)
     """
-    dataset_dir = 'E:/dataset/safe-campus'
+    dataset_dir = 'static/dataset/safe-campus'
 
     def __init__(self, root='', verbose=True, pid_begin = 0, **kwargs):
         super(Market1501, self).__init__()
-        self.dataset_dir = osp.join(root, self.dataset_dir)
         self.train_dir = osp.join(self.dataset_dir, 'bounding_box_train')
         self.query_dir = osp.join(self.dataset_dir, 'query')
         self.gallery_dir = osp.join(self.dataset_dir, 'bounding_box_test')
@@ -32,9 +31,9 @@ class Market1501(BaseImageDataset):
         query = self._process_dir(self.query_dir, relabel=False)
         gallery = self._process_dir(self.gallery_dir, relabel=False)
 
-        if verbose:
-            print("=> Market1501 loaded")
-            self.print_dataset_statistics(train, query, gallery)
+        # if verbose:
+        #     print("=> Market1501 loaded")
+        #     self.print_dataset_statistics(train, query, gallery)
 
         self.train = train
         self.query = query

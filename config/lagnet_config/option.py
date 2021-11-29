@@ -7,7 +7,7 @@ parser.add_argument('--nThread', type=int, default=8, help='number of threads fo
 parser.add_argument('--cpu', action='store_true', help='use cpu only')
 parser.add_argument('--nGPU', type=int, default=1, help='number of GPUs')
 
-parser.add_argument("--datadir", type=str, default="E:\\dataset\\Safe-campus", help='dataset directory')
+parser.add_argument("--datadir", type=str, default="static/dataset/safe-campus", help='dataset directory')
 parser.add_argument('--data_train', type=str, default='Market1501', help='train dataset name')
 parser.add_argument('--data_test', type=str, default='Market1501', help='test dataset name')
 

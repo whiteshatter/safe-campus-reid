@@ -137,15 +137,15 @@ def construct_engine(engine_args, log_freq, log_dir, checkpoint_dir, checkpoint_
         if (state['epoch']) % 10 == 0:
             # start testing
             t = time.strftime('%c')
-            print(
-                '*************************Start testing at {}**********************'.format(t))
+            # print(
+            #     '*************************Start testing at {}**********************'.format(t))
             result = test(state['network'], query_iterator,
                           gallary_iterator, state['gpu_ids'],**test_params)
 
-            for key in result:
-                writer.add_scalar('test/{}'.format(key),
-                                  result[key], state['epoch'])
-                print('{}: {}'.format(key, result[key]))
+            print(
+                '[INFO] mAP: {:.4f} rank1: {:.4f} rank5: {:.4f}'.format(
+                    result['mAP'], result['Top1'], result['Top5']
+                ))
 
         # Note: adjust learning after calling optimizer.step() as required by update after pytorch 1.1.0
         if lr_scheduler is not None:

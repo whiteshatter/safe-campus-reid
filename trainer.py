@@ -108,6 +108,22 @@ class Trainer():
         self.train_cluster_one_stage(model, config, args, train_iterator, val_iterator, query_iterator, gallery_iterator, id_iterator)
 
     def train_cluster_one_stage(self, model, config, args, train_iterator, val_iterator, query_iterator, gallery_iterator, id_iterator):
+        save_path = args.restore_file
+        if save_path is not None:
+            if args.gpu_ids is None:
+                checkpoint = torch.load(save_path)
+            else:
+                loc = 'cuda:{}'.format(args.gpu_ids[0])
+                checkpoint = torch.load(save_path, map_location=loc)
+            print('==> Resume checkpoint {}'.format(save_path))
+            if 'state_dict' in checkpoint:
+                checkpoint = checkpoint['state_dict']
+            if 'transfer' in args.version:
+                checkpoint = {key: val for key, val in checkpoint.items() if 'classifier' not in key}
+                msg = model.load_state_dict(checkpoint, strict=False)
+                print(msg)
+            else:
+                model.load_state_dict(checkpoint)
         optimizer = config.optimizer_func(model)
         model = model.cuda()
         if config.lr_scheduler_func:
@@ -126,7 +142,9 @@ class Trainer():
                            optimizer=optimizer,
                            )
 
-        checkpoint_dir = 'static/checkpoint/cluster'
+        checkpoint_dir = os.path.join('static/checkpoint/cluster', args.check_log_dir)
+        if not os.path.exists(checkpoint_dir):
+            os.makedirs(checkpoint_dir)
         args.log_dir = os.path.join('logs', 'cluster')
         if args.restore_file is None:
             # move initialization into the model constuctor __init__
