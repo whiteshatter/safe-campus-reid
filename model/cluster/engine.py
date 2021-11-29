@@ -71,9 +71,10 @@ class Engine(object):
                 if isinstance(loss, dict):
                     loss = loss['total_loss']
                 loss.backward()
-                print('\r[INFO] epoch: {}\t{}/{}\t[loss: {}]'.format(
-                    state['epoch'], index, len(state['train_iterator']),
-                    loss.cpu().data.numpy()))
+                if index % 100 == 0:
+                    print('\r[INFO] epoch: {}\t{}/{}\t[loss: {}]'.format(
+                        state['epoch'], index, len(state['train_iterator']),
+                        loss.cpu().data.numpy()))
                 state['optimizer'].step()
                 self.hook('on_end_update', state)
                 state['iteration'] += 1

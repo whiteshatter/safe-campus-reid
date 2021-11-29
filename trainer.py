@@ -226,8 +226,9 @@ class Trainer():
                 loss_.backward()
                     
                 optimizer.step()
-                print('\r[INFO] epoch: {}\t{}/{}\t{}'.format(
-                    epoch, batch + 1, len(train_loader), loss.display_loss(batch)))
+                if batch % 100 == 0:
+                    print('\r[INFO] epoch: {}\t{}/{}\t{}'.format(
+                        epoch, batch + 1, len(train_loader), loss.display_loss(batch)))
             epoch += 1
 
             # self.ckpt.write_log('\r[INFO] [{}/{}]\t{}/{}\t{}'.format(
