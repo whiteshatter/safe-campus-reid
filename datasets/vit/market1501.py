@@ -17,7 +17,7 @@ class Market1501(BaseImageDataset):
     # identities: 1501 (+1 for background)
     # images: 12936 (train) + 3368 (query) + 15913 (gallery)
     """
-    dataset_dir = 'E:/Datasets/market1501'
+    dataset_dir = 'E:/dataset/safe-campus'
 
     def __init__(self, root='', verbose=True, pid_begin = 0, **kwargs):
         super(Market1501, self).__init__()
@@ -57,7 +57,7 @@ class Market1501(BaseImageDataset):
 
     def _process_dir(self, dir_path, relabel=False):
         img_paths = glob.glob(osp.join(dir_path, '*.jpg'))
-        pattern = re.compile(r'([-\d]+)_c(\d)')
+        pattern = re.compile(r'([-\d]+)_c(\d+)')
 
         pid_container = set()
         for img_path in sorted(img_paths):
@@ -68,9 +68,9 @@ class Market1501(BaseImageDataset):
         dataset = []
         for img_path in sorted(img_paths):
             pid, camid = map(int, pattern.search(img_path).groups())
-            if pid == -1: continue  # junk images are just ignored
-            assert 0 <= pid <= 1501  # pid == 0 means background
-            assert 1 <= camid <= 6
+            # if pid == -1: continue  # junk images are just ignored
+            # assert 0 <= pid <= 1501  # pid == 0 means background
+            # assert 1 <= camid <= 6
             camid -= 1  # index starts from 0
             if relabel: pid = pid2label[pid]
 

@@ -7,14 +7,14 @@ parser.add_argument('--nThread', type=int, default=8, help='number of threads fo
 parser.add_argument('--cpu', action='store_true', help='use cpu only')
 parser.add_argument('--nGPU', type=int, default=1, help='number of GPUs')
 
-parser.add_argument("--datadir", type=str, default="/home/swjtu/dataset/Safe-campus-V3.3", help='dataset directory')
+parser.add_argument("--datadir", type=str, default="E:\\dataset\\Safe-campus", help='dataset directory')
 parser.add_argument('--data_train', type=str, default='Market1501', help='train dataset name')
 parser.add_argument('--data_test', type=str, default='Market1501', help='test dataset name')
 
 parser.add_argument('--reset', action='store_true', help='reset the training')
 parser.add_argument("--epochs", type=int, default=600, help='number of epochs to train')
 parser.add_argument('--test_every', type=int, default=200, help='do test per every N epochs')
-parser.add_argument("--batchid", type=int, default=8, help='the batch for id')
+parser.add_argument("--batchid", type=int, default=4, help='the batch for id')
 parser.add_argument("--batchimage", type=int, default=4, help='the batch of per id')
 parser.add_argument("--batchtest", type=int, default=16, help='input batch size for test')
 parser.add_argument('--test_only', action='store_true', help='set this option to test the model')

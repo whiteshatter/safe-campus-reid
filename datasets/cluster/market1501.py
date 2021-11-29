@@ -35,9 +35,9 @@ class Market1501(BaseImageDataset):
         query = self._process_dir(self.query_dir, relabel=False)
         gallery = self._process_dir(self.gallery_dir, relabel=False)
 
-        if verbose:
-            print("=> Market1501 loaded")
-            self.print_dataset_statistics(train, query, gallery)
+        # if verbose:
+        #     print("=> Market1501 loaded")
+        #     self.print_dataset_statistics(train, query, gallery)
 
         self.train = train
         self.query = query

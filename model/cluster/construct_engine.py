@@ -92,7 +92,7 @@ def construct_engine(engine_args, log_freq, log_dir, checkpoint_dir, checkpoint_
             global id_features
             if id_feature_params['update_freq'] == 'epoch' or id_features is None:
                 id_features = calculate_id_features(
-                    state['network'], id_iterator, state['gpu_ids'], method=id_feature_params['method'])
+                    state['epoch'], state['network'], id_iterator, state['gpu_ids'], method=id_feature_params['method'])
 
     def on_end_sample(state):
         wrap_data(state)

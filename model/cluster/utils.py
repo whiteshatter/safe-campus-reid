@@ -8,6 +8,22 @@ from . import model_mgn
 def construct_model(args, config):
     if 'external' in args.model_name:
         model = external_model_factory[args.model_name](**config.external_model_paras)
+        save_path = args.restore_file
+        if save_path is not None:
+            if args.gpu_ids is None:
+                checkpoint = torch.load(save_path)
+            else:
+                loc = 'cuda:{}'.format(args.gpu_ids[0])
+                checkpoint = torch.load(save_path, map_location=loc)
+            print('==> Resume checkpoint {}'.format(save_path))
+            if 'state_dict' in checkpoint:
+                checkpoint = checkpoint['state_dict']
+            if 'transfer' in args.version:
+                checkpoint = {key: val for key, val in checkpoint.items() if 'classifier' not in key}
+                msg = model.load_state_dict(checkpoint, strict=False)
+                print(msg)
+            else:
+                model.load_state_dict(checkpoint)
         return model
 
     feacture_extractor = feature_extractor_factory[args.model_name](

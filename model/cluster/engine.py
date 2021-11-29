@@ -58,18 +58,22 @@ class Engine(object):
 
         while state['epoch'] < state['maxepoch']:
             self.hook('on_start_epoch', state)
-            state['network'].train() # TODO: may need extra attention for id only loss
+            state['network'].train()  # TODO: may need extra attention for id only loss
 
-            for sample in tqdm(state['train_iterator']):
+            for index, sample in enumerate(state['train_iterator']):
                 state['sample'] = sample
                 self.hook('on_end_sample', state)
                 ipt, target = state['sample'][0], state['sample'][1]
+
                 loss = self.forward(ipt, target)
 
                 state['optimizer'].zero_grad()
                 if isinstance(loss, dict):
                     loss = loss['total_loss']
                 loss.backward()
+                print('\r[INFO] epoch: {}\t{}/{}\t[loss: {}]'.format(
+                    state['epoch'], maxepoch, index + 1,
+                    loss.cpu().data.numpy()))
                 state['optimizer'].step()
                 self.hook('on_end_update', state)
                 state['iteration'] += 1

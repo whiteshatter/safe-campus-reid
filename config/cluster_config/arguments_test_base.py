@@ -26,7 +26,7 @@ class ArgumentsBase(object):
                             help='model name which defines the structure of model backbones')
 
         # training/testing configuration version
-        parser.add_argument('-vs', '--version', type=str, default='train-all_duke-large-input_const-lr_new-optim_adam_id_erasing_test-bnneck-flips',
+        parser.add_argument('-vs', '--version', type=str, default='train-all_flips_duke-large-input',
                             help='defines model architecture, training settings and metrics')
 
     def parse_args(self):

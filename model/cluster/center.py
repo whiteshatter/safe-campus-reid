@@ -5,11 +5,11 @@ from collections import defaultdict
 from tqdm import tqdm
 from .evaluation import fliplr
 
-def calculate_id_features(feature_extractor, training_iterator, gpu_ids, method='avg', flips=True):
+def calculate_id_features(epoch, feature_extractor, training_iterator, gpu_ids, method='avg', flips=True):
     print('==> extracting training features...')
     with torch.no_grad():
         fets, targets, probs = extract_features_for_id(
-            feature_extractor, training_iterator, gpu_ids, is_test=False, flips=flips)
+            epoch, feature_extractor, training_iterator, gpu_ids, is_test=False, flips=flips)
         id_features = defaultdict(list)
         prob_dict = defaultdict(list)
         for i in range(fets.shape[0]):
@@ -42,7 +42,7 @@ def update_id_features(fet, target, moumentum=0.9):
             id_features[pid] = moumentum * id_features[pid] + (1 - moumentum) * id_feature_update
     return id_features
 
-def extract_features_for_id(feature_extractor, data_iterator, gpu_ids, is_test, flips=False):
+def extract_features_for_id(epoch, feature_extractor, data_iterator, gpu_ids, is_test, flips=False):
     feature_extractor.eval()
     fets = []
     probs = []
@@ -52,7 +52,8 @@ def extract_features_for_id(feature_extractor, data_iterator, gpu_ids, is_test, 
 
     with torch.no_grad():
         one_hot_class = None
-        for ipt, target in tqdm(data_iterator):
+        for i, (ipt, target) in enumerate(data_iterator):
+            print("[INFO] epoch: {} extracting training feature [{}/{}]".format(epoch + 1, i, len(data_iterator)))
             if gpu_ids is not None:
                 if len(gpu_ids) == 1:
                     ipt = ipt.cuda(gpu_ids[0], non_blocking=True)

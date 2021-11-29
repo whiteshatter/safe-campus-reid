@@ -24,7 +24,7 @@ _C.MODEL.NAME = 'transformer'
 # Last stride of backbone
 _C.MODEL.LAST_STRIDE = 1
 # Path to pretrained model of backbone
-_C.MODEL.PRETRAIN_PATH = 'E:/jx_vit_base_p16_224-80ecf9dd.pth'
+_C.MODEL.PRETRAIN_PATH = 'static/modelzoo/jx_vit_base_p16_224-80ecf9dd.pth'
 
 # Use ImageNet pretrained model to initialize backbone or use self trained model to initialize the whole model
 # Options: 'imagenet' , 'self' , 'finetune'
@@ -186,4 +186,4 @@ _C.TEST.EVAL = True
 # Misc options
 # ---------------------------------------------------------------------------- #
 # Path to checkpoint and saved log of trained model
-_C.OUTPUT_DIR = "F:/logs/vit"
+_C.OUTPUT_DIR = "logs/vit"
